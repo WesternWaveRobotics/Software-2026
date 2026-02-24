@@ -17,11 +17,11 @@ while cap.isOpened():
     ret, frame = cap.read()
 
     if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
+        print("Stream BROKEN, closing...")
         break
 
     # Get results from model, conf(confidence) > 0.25??
-    results = model(frame, conf=0.25, verbose=True)
+    results = model(frame, conf=0.25, verbose=True, classes=[2])
 
     # For each result create bounding-boxes
     for result in results:
@@ -36,6 +36,7 @@ while cap.isOpened():
         for (x1, y1, x2, y2), name in zip(xyxy, names):
             # Draw bounding boxes
             cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+
             # Label the name of detected obj
             cv2.putText(
                 frame,
