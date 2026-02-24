@@ -149,6 +149,8 @@ class ROV_GUI(QWidget):
 
     def closeEvent(self, event):
         """Release resources when the GUI is closed."""
+        self.timer.stop()
+        self.controller_timer.stop()
         cap.release()
         pygame.quit()
         event.accept()
