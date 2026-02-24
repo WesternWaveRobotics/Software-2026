@@ -4,9 +4,9 @@ import time
 import cv2
 import pygame
 import serial
-from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 
 # Initialize Pygame for joystick handling
 pygame.init()
@@ -17,7 +17,7 @@ controller = pygame.joystick.Joystick(0)
 ser = serial.Serial("COM3", 9600)
 
 # Open the USB camera (adjust index if needed)
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 
 def calculate_thrust(surge, sway, yaw):
@@ -59,7 +59,7 @@ class ROV_GUI(QWidget):
         super().__init__()
         # GUI setup
         self.setWindowTitle("ROV Control and Camera Feed")
-        self.setGeometry(100, 100, 1536, 864)
+        self.setGeometry(100, 100, 1300, 700)
 
         # Video feed display
         self.label = QLabel(self)
@@ -86,7 +86,7 @@ class ROV_GUI(QWidget):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         height, width = self.label.height(), self.label.width()  # Get QLabel size
         frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_LINEAR)  # Resize to fit window
-        qimg = QImage(frame.data, width, height, 3 * width, QImage.Format_RGB888)
+        qimg = QImage(frame.data, width, height, 3 * width, QImage.Format.Format_RGB888)
         self.label.setPixmap(QPixmap.fromImage(qimg))
 
     def read_controller(self):
@@ -161,4 +161,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = ROV_GUI()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
