@@ -7,6 +7,7 @@ import serial
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+from ultralytics import solutions
 
 # Initialize Pygame for joystick handling
 pygame.init()
@@ -18,6 +19,11 @@ ser = serial.Serial("COM3", 9600)
 
 # Open the USB camera (adjust index if needed)
 cap = cv2.VideoCapture(0)
+
+region_pts = [(0, 1000), (1900, 1000), (1900, 0), (0, 0)]
+counter = solutions.ObjectCounter(
+    model="yolo26n.pt", classes=[2], conf=0.25, region=region_pts, device="cpu", show_out=False
+)
 
 
 def calculate_thrust(surge, sway, yaw):
@@ -83,11 +89,15 @@ class ROV_GUI(QWidget):
         ret, frame = cap.read()
         if not ret:
             return  # Exit if frame is not read correctly
+
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         height, width = self.label.height(), self.label.width()  # Get QLabel size
         frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_LINEAR)  # Resize to fit window
         qimg = QImage(frame.data, width, height, 3 * width, QImage.Format.Format_RGB888)
         self.label.setPixmap(QPixmap.fromImage(qimg))
+
+        if count_crabs:
+            counter(frame)
 
     def read_controller(self):
         """Read Xbox controller inputs and send motor commands."""
@@ -158,6 +168,9 @@ class ROV_GUI(QWidget):
 
 # Run the GUI application
 if __name__ == "__main__":
+    # for testing purposes
+    count_crabs = True
+
     app = QApplication(sys.argv)
     window = ROV_GUI()
     window.show()
