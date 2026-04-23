@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
         # Camera Setup
-        self.video_label = QLabel("VIDEO")
+        self.video_label = QLabel("VIDEO STREAM")
         self.video_label.setMinimumSize(640, 480)
         self.layout.addWidget(self.video_label)
 
@@ -194,7 +194,7 @@ class MainWindow(QMainWindow):
         self.camera_thread.start()
 
         # Controller Setup
-        self.controller_label = QLabel("CONTROLLER")
+        self.controller_label = QLabel("CONTROLLER CONNECTED")
         self.layout.addWidget(self.controller_label)
 
         self.controller_thread = QThread()
