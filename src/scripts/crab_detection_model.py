@@ -2,10 +2,10 @@ import cv2
 from ultralytics import YOLO
 
 # Initialize custom model
-model = YOLO("./models/crabs_exp9.pt")  # yolo26n.pt
+model = YOLO("./models/yolo26n.pt")  # yolo26n.pt
 
 # Video stream
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 # Make sure camera is open
 if not cap.isOpened():

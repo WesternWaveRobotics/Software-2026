@@ -1,11 +1,11 @@
 #include <Servo.h>
 
-#define MOTOR_FL 3 // Front Left Motor pin
-#define MOTOR_FR 5 // Front Right Motor pin
+#define MOTOR_FL 5 // Front Left Motor pin
+#define MOTOR_FR 11 // Front Right Motor pin
 #define MOTOR_BL 6 // Back Left Motor pin
 #define MOTOR_BR 9 // Back Right Motor pin
-#define MOTOR_UP1 10// Up Motor 1 pin
-#define MOTOR_UP2 11 // Up Motor 2 pin  
+#define MOTOR_UP1 3// Up Motor 1 pin
+#define MOTOR_UP2 10 // Up Motor 2 pin  
 
 Servo motorFL, motorFR, motorBL, motorBR, motorUp1, motorUp2;
 
