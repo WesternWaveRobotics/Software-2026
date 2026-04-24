@@ -96,7 +96,7 @@ class ControllerWorker(QObject):
                 # D-pad
                 dpad_x, dpad_y = controller.get_hat(0)
                 # Buttons
-                # A = controller.get_button(0)
+                # button_A = controller.get_button(0)
                 # B = controller.get_button(1)
                 # X = controller.get_button(2)
                 # Y = controller.get_button(3)
@@ -141,7 +141,7 @@ class ControllerWorker(QObject):
         motorFR = max(-1.0, min(1.0, surge - sway - yaw))
         motorBL = max(-1.0, min(1.0, surge - sway + yaw))
         motorBR = max(-1.0, min(1.0, surge + sway - yaw))
-        motorUPL = heave
+        motorUPL = -heave
         motorUPR = heave
 
         return motorFL, motorFR, motorBL, motorBR, motorUPL, motorUPR
@@ -234,8 +234,8 @@ class MainWindow(QMainWindow):
         """Send scaled motor control data to arduino"""
         print(cntrl_data)
 
-        # command = f"{int(cntrl_data["motorFL"])} {cntrl_data["motorFR"]} {cntrl_data["motorBL"]} {cntrl_data["motorBR"]} {cntrl_data["motorUPL"]} {cntrl_data["motorUPR"]}\n"
-        # self.ser.write(command.encode("utf-8"))
+        command = f"{int(cntrl_data["motorFL"])} {int(cntrl_data["motorFR"])} {int(cntrl_data["motorBL"])} {int(cntrl_data["motorBR"])} {int(cntrl_data["motorUPL"])} {int(cntrl_data["motorUPR"])}\n"
+        self.ser.write(command.encode("utf-8"))
 
     def handle_camera_error(self, msg):
         self.video_label.setText(f"Camera Error:\n{msg}")

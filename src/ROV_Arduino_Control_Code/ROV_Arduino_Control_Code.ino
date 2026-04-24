@@ -13,8 +13,8 @@ int motorSpeedFL = 1500;
 int motorSpeedFR = 1500;
 int motorSpeedBL = 1500;
 int motorSpeedBR = 1500;
-int motorSpeedUpL = 1500;
-int motorSpeedUpR = 1500;
+int motorSpeedUPL = 1500;
+int motorSpeedUPR = 1500;
 
 void setup() {
   Serial.begin(9600);
@@ -24,16 +24,16 @@ void setup() {
   motorFR.attach(MOTOR_FR);
   motorBL.attach(MOTOR_BL);
   motorBR.attach(MOTOR_BR);
-  motorUpL.attach(MOTOR_UPL);
-  motorUpR.attach(MOTOR_UPR);
+  motorUPL.attach(MOTOR_UPL);
+  motorUPR.attach(MOTOR_UPR);
 
 // Set all motors to the neutral speed (1500 is neutral for most ESCs)
   motorFL.writeMicroseconds(1500);
   motorFR.writeMicroseconds(1500);
   motorBL.writeMicroseconds(1500);
   motorBR.writeMicroseconds(1500);
-  motorUpL.writeMicroseconds(1500);
-  motorUpR.writeMicroseconds(1500);
+  motorUPL.writeMicroseconds(1500);
+  motorUPR.writeMicroseconds(1500);
 }
 
 void loop () {
@@ -41,20 +41,20 @@ void loop () {
     // Read the serial input from the laptop
     String inputString = Serial.readStringUntil('\n');
     // Parse the input into individual motor speeds
-    sscanf(inputString.c_str(), "%d %d %d %d %d %d", &motorSpeedFL, &motorSpeedFR, &motorSpeedBL, &motorSpeedBR, &motorSpeedUp1, &motorSpeedUp2);
+    sscanf(inputString.c_str(), "%d %d %d %d %d %d", &motorSpeedFL, &motorSpeedFR, &motorSpeedBL, &motorSpeedBR, &motorSpeedUPL, &motorSpeedUPR);
 // Ensure values stay within ESC range (1000-2000 microseconds)
     motorSpeedFL = constrain(motorSpeedFL, 1000, 2000);
     motorSpeedFR = constrain(motorSpeedFR, 1000, 2000);
     motorSpeedBL = constrain(motorSpeedBL, 1000, 2000);
     motorSpeedBR = constrain(motorSpeedBR, 1000, 2000);
-    motorSpeedUp1 = constrain(motorSpeedUp1, 1000, 2000);
-    motorSpeedUp2 = constrain(motorSpeedUp2, 1000, 2000);
+    motorSpeedUPL = constrain(motorSpeedUPL, 1000, 2000);
+    motorSpeedUPR = constrain(motorSpeedUPR, 1000, 2000);
 // Set motor speeds
    motorFL.writeMicroseconds(motorSpeedFL);
    motorFR.writeMicroseconds(motorSpeedFR);
    motorBL.writeMicroseconds(motorSpeedBL);
    motorBR.writeMicroseconds(motorSpeedBR);
-   motorUPL.writeMicroseconds(motorSpeedUp1);
-   motorUPR.writeMicroseconds(motorSpeedUp2);
+   motorUPL.writeMicroseconds(motorSpeedUPL);
+   motorUPR.writeMicroseconds(motorSpeedUPR);
   }
 }
