@@ -7,7 +7,14 @@ import pygame
 import serial
 from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (
+    QApplication,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class CameraWorker(QObject):
@@ -207,11 +214,14 @@ class MainWindow(QMainWindow):
         self.controller_thread.start()
 
         # Arduino setup
-        # self.ser = serial.Serial("COM4", 9600)
+        self.ser = None
+        self.serial_btn = QPushButton("Connect to Arduino")
+        self.serial_btn.clicked.connect(self.connect_serial)
+        self.layout.addWidget(self.serial_btn)
 
     # QT Slot - Camera
     def update_frame(self, frame):
-        """Display live video feed from the camera"""
+        """Display live video feed from the camera."""
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         h, w, ch = rgb_frame.shape
         bytes_per_line = ch * w
@@ -234,8 +244,8 @@ class MainWindow(QMainWindow):
         """Send scaled motor control data to arduino"""
         print(cntrl_data)
 
-        # command = f"{int(cntrl_data["motorFL"])} {int(cntrl_data["motorFR"])} {int(cntrl_data["motorBL"])} {int(cntrl_data["motorBR"])} {int(cntrl_data["motorUPL"])} {int(cntrl_data["motorUPR"])}\n"
-        # self.ser.write(command.encode("utf-8"))
+        command = f"{int(cntrl_data["motorFL"])} {int(cntrl_data["motorFR"])} {int(cntrl_data["motorBL"])} {int(cntrl_data["motorBR"])} {int(cntrl_data["motorUPL"])} {int(cntrl_data["motorUPR"])}\n"
+        self.ser.write(command.encode("utf-8"))
 
     def handle_camera_error(self, msg):
         self.video_label.setText(f"Camera Error:\n{msg}")
@@ -256,6 +266,8 @@ class MainWindow(QMainWindow):
         self.controller_thread.wait()
 
         # others
+        if self.ser:
+            self.ser.close()
         pygame.quit()
         event.accept()
 
