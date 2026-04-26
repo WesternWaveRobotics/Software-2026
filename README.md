@@ -6,6 +6,7 @@
     <li><a href="#development-setup">Development Setup</a></li>
     <li><a href="#software-structure">Software Structure</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ul>
 </details>
 
@@ -47,3 +48,11 @@ python -m pip install -e ".[dev]"
   workers.py                  <- Worker Threads
 run.py                      <- Topside controls entry point
 ```
+
+## Roadmap
+- [x] **ROV Control:** Controller math, thruster esc scaling, controller value outputs, etc.
+- [ ] **UI Polish:** Refine UI, live video feed display, debug console.
+- [ ] **Task 2.1:** Implement image recognition using Ultralytics YOLO26.
+
+## Acknowledgments
+- PythonGUIs - amazing free PyQt6 introduction (as well as many others)
