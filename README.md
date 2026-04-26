@@ -61,4 +61,5 @@ Software-2026/                <- Project root
 - [ ] **Task 2.1:** Implement image recognition using Ultralytics YOLO26.
 
 ## Acknowledgments
-- [PythonGUIs](https://www.pythonguis.com/) - amazing free PyQt6 introduction (as well as many others)
+- [PythonGUIs](https://www.pythonguis.com/) - Amazing free PyQt6 introduction (as well as many others)
+- [Best-README-Template](https://github.com/othneildrew/Best-README-Template) - README inspo
