@@ -1,3 +1,5 @@
+# run.py - Main entry point for topside control software.
+
 import sys
 
 from PyQt6.QtWidgets import QApplication
