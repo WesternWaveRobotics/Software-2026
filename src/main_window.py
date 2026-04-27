@@ -116,11 +116,11 @@ class MainWindow(QMainWindow):
         if "Disconnected" in status:
             self.thruster_display.clear()
 
-    def connect_serial(self, port="COM4", baudrate=9600):
+    def connect_serial(self):
         """Attempt to connect to the Arduino via serial port."""
 
         try:
-            self.ser = serial.Serial(port, baudrate)
+            self.ser = serial.Serial(port="COM4", baudrate=9600)
             self.debug.appendPlainText("Arduino Connected")
             self.serial_btn.setText("Connected")
             self.serial_btn.setEnabled(False)
