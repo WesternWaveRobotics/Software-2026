@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         # Camera Setup
         self.video_label = QLabel("VIDEO STREAM")
         self.video_label.setMinimumSize(640, 480)
-        self.layout.addWidget(self.video_label)
+        self.layout.addWidget(self.video_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.camera_thread = QThread()
         self.camera_worker = CameraWorker(fps=30)
@@ -113,17 +113,18 @@ class MainWindow(QMainWindow):
         if "Disconnected" in status:
             self.thruster_display.clear()
 
-    def connect_serial(self):
+    def connect_serial(self, port="COM4", baudrate=9600):
         """Attempt to connect to the Arduino via serial port."""
+
         try:
-            self.ser = serial.Serial("COM4", 9600)
+            self.ser = serial.Serial(port, baudrate)
             self.debug.appendPlainText("Arduino Connected")
             self.serial_btn.setText("Connected")
             self.serial_btn.setEnabled(False)
         except Exception as e:
             self.debug.appendPlainText(f"Serial Error:\n{str(e)}")
-            self.serial_btn.setText("Connection Failed")
-            self.serial_btn.setEnabled(False)
+            self.serial_btn.setText("Connect to Arduino")
+            self.serial_btn.setEnabled(True)
 
     def closeEvent(self, event):
         """Release resources when the GUI is closed."""
