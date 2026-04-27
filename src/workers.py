@@ -22,6 +22,7 @@ class CameraWorker(QObject):
 
     def run(self):
         frame_time = 1.0 / self.fps
+
         try:
             cap = cv2.VideoCapture(0)
 
@@ -58,12 +59,13 @@ class CameraWorker(QObject):
 
 class ControllerWorker(QObject):
     # Signals
+    status = pyqtSignal(str)
     controller_ready = pyqtSignal(dict)
-    error = pyqtSignal(str)
 
     def __init__(self, poll_rate=30):
         super().__init__()
         self.rate = poll_rate
+        self.controllers = {}
         self.cntrl_data = {}
         self.running = True
 
@@ -73,62 +75,70 @@ class ControllerWorker(QObject):
 
         interval = 1 / self.rate  # Time between polls in seconds
 
-        try:
-            if pygame.joystick.get_count() == 0:
-                raise Exception("No Controller Connected")
+        while self.running:
+            start_time = time.time()
 
-            controller = pygame.joystick.Joystick(0)
+            # Controller hotplugging
+            for event in pygame.event.get():
+                if event.type == pygame.JOYDEVICEADDED:
+                    controller = pygame.joystick.Joystick(event.device_index)
+                    self.controllers[controller.get_instance_id()] = controller
+                    self.status.emit(f"Controller {controller.get_instance_id()} Connected")
 
-            while self.running:
-                start_time = time.time()
-                pygame.event.pump()
+                elif event.type == pygame.JOYDEVICEREMOVED:
+                    del self.controllers[event.instance_id]
+                    self.status.emit(f"Controller {event.instance_id} Disconnected")
 
-                # Joysticks
-                left_stick_x = controller.get_axis(0)
-                left_stick_y = controller.get_axis(1)
-                right_stick_x = controller.get_axis(2)
-                right_stick_y = controller.get_axis(3)
+            if not self.controllers:
+                time.sleep(0.1)
+                continue
 
-                # Triggers
-                # left_trigger = controller.get_axis(4)
-                # right_trigger = controller.get_axis(5)
+            # Use the first connected controller
+            controller = list(self.controllers.values())[0]
 
-                # D-pad
-                # dpad_x, dpad_y = controller.get_hat(0)
-                # Buttons
-                # button_A = controller.get_button(0)
-                # B = controller.get_button(1)
-                # X = controller.get_button(2)
-                # Y = controller.get_button(3)
+            # Joysticks
+            left_stick_x = controller.get_axis(0)
+            left_stick_y = controller.get_axis(1)
+            right_stick_x = controller.get_axis(2)
+            right_stick_y = controller.get_axis(3)
 
-                # Bumpers
-                # LB = controller.get_button(4)
-                # RB = controller.get_button(5)
+            # Triggers
+            # left_trigger = controller.get_axis(4)
+            # right_trigger = controller.get_axis(5)
 
-                surge = apply_deadzone(-left_stick_y)
-                yaw = apply_deadzone(left_stick_x)
-                sway = apply_deadzone(right_stick_x)
-                heave = apply_deadzone(-right_stick_y)
+            # D-pad
+            # dpad_x, dpad_y = controller.get_hat(0)
+            # Buttons
+            # button_A = controller.get_button(0)
+            # B = controller.get_button(1)
+            # X = controller.get_button(2)
+            # Y = controller.get_button(3)
 
-                motorFL, motorFR, motorBL, motorBR, motorUPL, motorUPR = calculate_thrust(
-                    surge, sway, yaw, heave
-                )
+            # Bumpers
+            # LB = controller.get_button(4)
+            # RB = controller.get_button(5)
 
-                self.cntrl_data["motorFL"] = scale(motorFL)
-                self.cntrl_data["motorFR"] = scale(motorFR)
-                self.cntrl_data["motorBL"] = scale(motorBL)
-                self.cntrl_data["motorBR"] = scale(motorBR)
-                self.cntrl_data["motorUPL"] = scale(motorUPL)
-                self.cntrl_data["motorUPR"] = scale(motorUPR)
+            surge = apply_deadzone(-left_stick_y, deadzone=0.1)
+            yaw = apply_deadzone(left_stick_x, deadzone=0.1)
+            sway = apply_deadzone(right_stick_x, deadzone=0.1)
+            heave = apply_deadzone(-right_stick_y, deadzone=0.1)
 
-                self.controller_ready.emit(self.cntrl_data.copy())  # Send data to main thread
+            motorFL, motorFR, motorBL, motorBR, motorUPL, motorUPR = calculate_thrust(
+                surge, sway, yaw, heave
+            )
 
-                # limit polling rate (similar to fps)
-                elapsed = time.time() - start_time  # Elapsed time to load single frame
-                time.sleep(max(0, interval - elapsed))
+            self.cntrl_data["motorFL"] = scale(motorFL)
+            self.cntrl_data["motorFR"] = scale(motorFR)
+            self.cntrl_data["motorBL"] = scale(motorBL)
+            self.cntrl_data["motorBR"] = scale(motorBR)
+            self.cntrl_data["motorUPL"] = scale(motorUPL)
+            self.cntrl_data["motorUPR"] = scale(motorUPR)
 
-        except Exception as e:
-            self.error.emit(str(e))
+            self.controller_ready.emit(self.cntrl_data.copy())  # Send data to main thread
+
+            # limit polling rate (similar to fps)
+            elapsed = time.time() - start_time  # Elapsed time to load single frame
+            time.sleep(max(0, interval - elapsed))
 
     def stop(self):
         self.running = False

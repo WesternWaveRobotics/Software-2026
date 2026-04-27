@@ -39,7 +39,6 @@ class MainWindow(QMainWindow):
 
         self.camera_thread = QThread()
         self.camera_worker = CameraWorker(fps=30)
-
         self.camera_worker.moveToThread(self.camera_thread)
 
         self.camera_thread.started.connect(self.camera_worker.run)
@@ -49,20 +48,17 @@ class MainWindow(QMainWindow):
         self.camera_thread.start()
 
         # Controller Setup
-        # TODO: rename - controller status. update to text box?
-        self.controller_label = QLabel("CONTROLLER CONNECTED")
-        self.layout.addWidget(self.controller_label)
-
         self.thruster_display = QPlainTextEdit()
         self.thruster_display.setReadOnly(True)
         self.layout.addWidget(self.thruster_display)
 
         self.controller_thread = QThread()
         self.controller_worker = ControllerWorker()
+        self.controller_worker.moveToThread(self.controller_thread)
 
         self.controller_thread.started.connect(self.controller_worker.run)
-        self.controller_worker.controller_ready.connect(self.read_controller)
-        self.controller_worker.error.connect(self.handle_controller_error)
+        self.controller_worker.controller_ready.connect(self.send_command)
+        self.controller_worker.status.connect(self.update_controller_status)
 
         self.controller_thread.start()
 
@@ -95,18 +91,27 @@ class MainWindow(QMainWindow):
 
         self.video_label.setPixmap(scaled_pixmap)
 
+    def handle_camera_error(self, msg):
+        self.video_label.setText(f"Camera Error:\n{msg}")
+
     # QT Slot - Controller
-    def read_controller(self, cntrl_data):
+    def send_command(self, cntrl_data):
         """Send scaled motor control data to arduino"""
-        self.update_thruster_display(cntrl_data)
+
+        # Update the GUI display with the latest controller motor values.
+        lines = [f"{key}: {value}" for key, value in cntrl_data.items()]
+        self.thruster_display.setPlainText("\n".join(lines))
+
+        # Send motor values to Arduino if connected
         if self.ser:
             command = f"{int(cntrl_data['motorFL'])} {int(cntrl_data['motorFR'])} {int(cntrl_data['motorBL'])} {int(cntrl_data['motorBR'])} {int(cntrl_data['motorUPL'])} {int(cntrl_data['motorUPR'])}\n"
             self.ser.write(command.encode("utf-8"))
 
-    def update_thruster_display(self, cntrl_data):
-        """Update the GUI display with the latest controller motor values."""
-        lines = [f"{key}: {value}" for key, value in cntrl_data.items()]
-        self.thruster_display.setPlainText("\n".join(lines))
+    def update_controller_status(self, status):
+        """Update the controller status label."""
+        self.debug.appendPlainText(status)
+        if "Disconnected" in status:
+            self.thruster_display.clear()
 
     def connect_serial(self):
         """Attempt to connect to the Arduino via serial port."""
@@ -119,12 +124,6 @@ class MainWindow(QMainWindow):
             self.debug.appendPlainText(f"Serial Error:\n{str(e)}")
             self.serial_btn.setText("Connection Failed")
             self.serial_btn.setEnabled(False)
-
-    def handle_camera_error(self, msg):
-        self.video_label.setText(f"Camera Error:\n{msg}")
-
-    def handle_controller_error(self, msg):
-        self.controller_label.setText(f"Controller Error:\n{msg}")
 
     def closeEvent(self, event):
         """Release resources when the GUI is closed."""
