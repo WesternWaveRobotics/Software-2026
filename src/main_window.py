@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         self.thruster_display.setPlainText("\n".join(lines))
 
         # Send motor values to Arduino if connected
-        if self.ser:
+        if self.ser and self.ser.is_open:
             command = f"{int(cntrl_data['motorFL'])} {int(cntrl_data['motorFR'])} {int(cntrl_data['motorBL'])} {int(cntrl_data['motorBR'])} {int(cntrl_data['motorUPL'])} {int(cntrl_data['motorUPR'])}\n"
             self.ser.write(command.encode("utf-8"))
 
